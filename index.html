@@ -118,7 +118,7 @@
 		updateTime();
 
 		async function loadWeather() {
-			const key = 'cb811d966e73b49889033845a487df61', city = 'Raipur';
+			const key = 'Your_API_KEY', city = 'Raipur';
 			try {
 				const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${key}`);
 				if (!res.ok) throw new Error('Network error');
