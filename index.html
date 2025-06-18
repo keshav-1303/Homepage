@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<title>Homepage</title>
+	<style>
+		html, body {
+			margin: 0; padding: 0; height: 100vh; overflow: hidden;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			color: #fff; display: flex; flex-direction: column;
+			justify-content: center; align-items: center;
+			text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+			background-size: cover; background-position: center;
+			transition: background-image .8s ease;
+		}
+
+		@keyframes fadeInDown {
+			from { opacity: 0; transform: translateY(-20px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		html { animation: fadeInDown 0.3s ease-out; }
+
+		#time { font-size: 6rem; margin: 0; }
+		#greeting { font-size: 3rem; font-weight: bold; margin: -0.2em 0 1em; }
+		.light-name { font-size: 3rem; font-weight: 300; }
+
+		.location-box {
+			display: flex; align-items: center;
+			font-size: 1.6rem; font-weight: 500;
+			margin: -2em 0 0.5em; gap: 0.8rem;
+		}
+
+		.location-box img { width: 20px; height: 20px; filter: invert(1); }
+
+		.city-temp {
+			display: flex; align-items: center; gap: 0.3rem;
+			font-size: 1.5rem; font-weight: 400;
+		}
+
+		.city-temp img { width: 30px; height: 30px; }
+		.description { font-size: 1.5rem; font-weight: 400; }
+
+		#weather-icon {
+			width: 60px; height: 60px; filter: invert(1) brightness(1000%) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+		}
+
+		.weather-cards { display: flex; gap: 1rem; margin-bottom: 2em; }
+		.weather-card { background: rgba(255,255,255,0.2);
+			backdrop-filter: blur(6px); border-radius: .75rem;
+			padding: .5rem; width: 7rem; text-align: center;
+			box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+		}
+
+		.weather-card img { width: 30px; height: 30px;
+			filter: invert(1) brightness(1000%);
+		}
+
+		.weather-card .label { font-size: .8rem; font-weight: bold;
+			text-transform: uppercase; letter-spacing: .05em;
+			margin-bottom: .25rem;
+		}
+
+		.weather-card .value { font-size: 1.2rem; }
+
+		.nav-controls { position: absolute; bottom: 2%; display: flex; gap: 1rem; }
+		.nav-controls span { font-size: 1.5rem; cursor: pointer; user-select: none; }
+		.nav-controls span:hover { transform: scale(1.2); }
+	</style>
+</head>
+
+<body>
+	<h1 id="time">--:-- --</h1>
+	<div id="greeting">Good day, <span class="light-name">Keshav</span></div>
+
+	<div class="location-box">
+		<img src="weather-icons/location.png" alt="Location">
+		<span id="location">Loading...</span>
+		<div class="city-temp" id="location-temp">
+			--°C
+			<img id="weather-icon" src="" alt="Icon">
+		</div>
+		<span class="description" id="description">--</span>
+	</div>
+
+	<div class="weather-cards">
+		<div class="weather-card">
+			<img id="wind-icon" src="weather-icons/windspeed.png" alt="Wind">
+			<div class="label">Wind Speed</div>
+			<div id="wind-speed" class="value">-- m/s</div>
+		</div>
+		<div class="weather-card">
+			<img src="weather-icons/humidity.png" alt="Humidity">
+			<div class="label">Humidity</div>
+			<div id="humidity" class="value">--%</div>
+		</div>
+		<div class="weather-card">
+			<img src="weather-icons/feels-like.svg" alt="Feels Like">
+			<div class="label">Feels Like</div>
+			<div id="feels" class="value">--°C</div>
+		</div>
+	</div>
+
+	<div class="nav-controls">
+		<span id="prev">⇦</span>
+		<span id="next">⇨</span>
+	</div>
+
+	<script>
+		function updateTime() {
+			const now = new Date(), hrs = now.getHours(), mins = String(now.getMinutes()).padStart(2,'0'), isPM = hrs>=12, displayHrs = ((hrs+11)%12)+1;
+			document.getElementById('time').textContent = `${displayHrs}:${mins} ${isPM?'PM':'AM'}`;
+			document.getElementById('greeting').innerHTML =
+				`${hrs<12?'Good morning':hrs<18?'Good afternoon':'Good evening'}, <span class="light-name">Keshav</span>`;
+		}
+		setInterval(updateTime,1000);
+		updateTime();
+
+		async function loadWeather() {
+			const key = 'cb811d966e73b49889033845a487df61', city = 'Raipur';
+			try {
+				const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${key}`);
+				if (!res.ok) throw new Error('Network error');
+				const data = await res.json();
+
+				// header fields
+				document.getElementById('location').textContent = data.name;
+				const temp = Math.round(data.main.temp);
+				document.getElementById('location-temp').innerHTML =
+					`${temp}°C <img id=\"weather-icon\" src=\"https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png\" alt=\"Weather\">`;
+				document.getElementById('description').textContent =
+				data.weather[0].description;
+
+				// cards
+				document.getElementById('wind-speed').textContent = `${data.wind.speed} m/s`;
+				document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+				document.getElementById('feels').textContent =
+				Math.round(data.main.feels_like) + '°C';
+			} catch (e) {
+				console.error(e);
+				document.getElementById('location').textContent = 'Unavailable';
+			}
+		}
+		loadWeather();
+
+		// background
+		const IMAGE_COUNT = 8, IMAGES = Array.from({ length: IMAGE_COUNT }, (_,i) => `background/image${String(i).padStart(2,'0')}.jpg`);
+		let idx = Math.floor(Math.random()*IMAGES.length);
+		function setBg(i) { document.body.style.backgroundImage = `url('${IMAGES[i]}')`; }
+		document.getElementById('prev').onclick = () => setBg(idx = (idx-1+IMAGES.length)%IMAGES.length);
+		document.getElementById('next').onclick = () => setBg(idx = (idx+1)%IMAGES.length);
+		setBg(idx);
+	</script>
+</body>
+
+</html>
