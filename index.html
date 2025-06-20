@@ -12,7 +12,7 @@
 			justify-content: center; align-items: center;
 			text-shadow: 0 1px 3px rgba(0,0,0,0.9);
 			background-size: cover; background-position: center;
-			transition: background-image .8s ease;
+			transition: background-image .8s ease-out;
 		}
 
 		@keyframes fadeInDown {
@@ -46,18 +46,70 @@
 			width: 60px; height: 60px; filter: invert(1) brightness(1000%) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 		}
 
-		.weather-cards { display: flex; gap: 1rem; margin-bottom: 2em; }
-		.weather-card { background: rgba(255,255,255,0.2);
-			backdrop-filter: blur(6px); border-radius: .75rem;
-			padding: .5rem; width: 7rem; text-align: center;
-			box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+		.weather-cards { display: flex; gap: 1rem; margin-bottom: 2em; padding: 1em;}
+
+		/* Liquid Glass Effect Styles */
+		.liquidGlass-wrapper {
+			position: relative;
+			display: flex;
+			font-weight: 600;
+			overflow: hidden;
+			color: white;
+			box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
+			transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
 		}
 
-		.weather-card img { width: 30px; height: 30px;
+		.liquidGlass-effect {
+			position: absolute;
+			z-index: 0;
+			inset: 0;
+			backdrop-filter: blur(3px);
+			filter: url(#glass-distortion);
+			overflow: hidden;
+			isolation: isolate;
+		}
+
+		.liquidGlass-tint {
+			z-index: 1;
+			position: absolute;
+			inset: 0;
+			background: rgba(255, 255, 255, 0.2);
+		}
+
+		.liquidGlass-shine {
+			position: absolute;
+			inset: 0;
+			z-index: 2;
+			overflow: hidden;
+			border-radius: 2rem;
+			box-shadow: inset 2px 2px 7px 0 rgba(255, 255, 255, 0.3),
+				inset -1px -1px 7px 1px rgba(255, 255, 255, 0.3);
+		}
+
+		.liquidGlass-text {
+			z-index: 3;
+			position: relative;
+		}
+
+		.weather-card {
+			width: 7rem;
+			text-align: center;
+			padding: 1.25rem;
+			justify-content: center;
+			border-radius: 2rem;
+		}
+
+		.weather-card:hover {
+			transform: scale(1.05);
+		}
+
+		.weather-card img { 
+			width: 30px; height: 30px;
 			filter: invert(1) brightness(1000%);
 		}
 
-		.weather-card .label { font-size: .8rem; font-weight: bold;
+		.weather-card .label { 
+			font-size: .8rem; font-weight: bold;
 			text-transform: uppercase; letter-spacing: .05em;
 			margin-bottom: .25rem;
 		}
@@ -85,20 +137,37 @@
 	</div>
 
 	<div class="weather-cards">
-		<div class="weather-card">
-			<img id="wind-icon" src="weather-icons/windspeed.png" alt="Wind">
-			<div class="label">Wind Speed</div>
-			<div id="wind-speed" class="value">-- m/s</div>
+		<div class="liquidGlass-wrapper weather-card">
+			<div class="liquidGlass-effect"></div>
+			<div class="liquidGlass-tint"></div>
+			<div class="liquidGlass-shine"></div>
+			<div class="liquidGlass-text">
+				<img id="wind-icon" src="weather-icons/windspeed.png" alt="Wind">
+				<div class="label">Wind Speed</div>
+				<div id="wind-speed" class="value">-- m/s</div>
+			</div>
 		</div>
-		<div class="weather-card">
-			<img src="weather-icons/humidity.png" alt="Humidity">
-			<div class="label">Humidity</div>
-			<div id="humidity" class="value">--%</div>
+		
+		<div class="liquidGlass-wrapper weather-card">
+			<div class="liquidGlass-effect"></div>
+			<div class="liquidGlass-tint"></div>
+			<div class="liquidGlass-shine"></div>
+			<div class="liquidGlass-text">
+				<img src="weather-icons/humidity.png" alt="Humidity">
+				<div class="label">Humidity</div>
+				<div id="humidity" class="value">--%</div>
+			</div>
 		</div>
-		<div class="weather-card">
-			<img src="weather-icons/feels-like.svg" alt="Feels Like">
-			<div class="label">Feels Like</div>
-			<div id="feels" class="value">--°C</div>
+		
+		<div class="liquidGlass-wrapper weather-card">
+			<div class="liquidGlass-effect"></div>
+			<div class="liquidGlass-tint"></div>
+			<div class="liquidGlass-shine"></div>
+			<div class="liquidGlass-text">
+				<img src="weather-icons/feels-like.svg" alt="Feels Like">
+				<div class="label">Feels Like</div>
+				<div id="feels" class="value">--°C</div>
+			</div>
 		</div>
 	</div>
 
@@ -106,6 +175,63 @@
 		<span id="prev">⇦</span>
 		<span id="next">⇨</span>
 	</div>
+
+	<!-- SVG Filter for Glass Distortion Effect -->
+	<svg style="display: none">
+		<filter
+			id="glass-distortion"
+			x="0%"
+			y="0%"
+			width="100%"
+			height="100%"
+			filterUnits="objectBoundingBox"
+		>
+			<feTurbulence
+				type="fractalNoise"
+				baseFrequency="0.01 0.01"
+				numOctaves="1"
+				seed="5"
+				result="turbulence"
+			/>
+
+			<feComponentTransfer in="turbulence" result="mapped">
+				<feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+				<feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+				<feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+			</feComponentTransfer>
+
+			<feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+
+			<feSpecularLighting
+				in="softMap"
+				surfaceScale="5"
+				specularConstant="1"
+				specularExponent="100"
+				lighting-color="white"
+				result="specLight"
+			>
+				<fePointLight x="-200" y="-200" z="300" />
+			</feSpecularLighting>
+
+			<feComposite
+				in="specLight"
+				operator="arithmetic"
+				k1="0"
+				k2="1"
+				k3="1"
+				k4="0"
+				result="litImage"
+			/>
+
+			<feDisplacementMap
+				in="SourceGraphic"
+				in2="softMap"
+				scale="150"
+				xChannelSelector="R"
+				yChannelSelector="G"
+			/>
+		</filter>
+	</svg>
 
 	<script>
 		function updateTime() {
@@ -118,7 +244,7 @@
 		updateTime();
 
 		async function loadWeather() {
-			const key = 'Your_API_KEY', city = 'Raipur';
+			const key = 'cb811d966e73b49889033845a487df61', city = 'Raipur';
 			try {
 				const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${key}`);
 				if (!res.ok) throw new Error('Network error');
@@ -145,7 +271,7 @@
 		loadWeather();
 
 		// background
-		const IMAGE_COUNT = 8, IMAGES = Array.from({ length: IMAGE_COUNT }, (_,i) => `background/image${String(i).padStart(2,'0')}.jpg`);
+		const IMAGE_COUNT = 7, IMAGES = Array.from({ length: IMAGE_COUNT }, (_,i) => `background/image${String(i).padStart(2,'0')}.jpg`);
 		let idx = Math.floor(Math.random()*IMAGES.length);
 		function setBg(i) { document.body.style.backgroundImage = `url('${IMAGES[i]}')`; }
 		document.getElementById('prev').onclick = () => setBg(idx = (idx-1+IMAGES.length)%IMAGES.length);
